@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+repository=IMAGE_NAME # e.g., ruby, or openjdk
+parent=base
+variants=(node)
+versions=(SPACE SEPARATED LIST OF VERSION STRINGS) # e.g., (2.4.6 2.5.5 2.6.3)
+
+# for images with unique-per-version download URLs, an additional array may be necessary:
+
+urls=(SPACE-SEPARATED LIST OF, IDEALLY, URL SNIPPETS CONTAINING
+	ONLY THE UNIQUE/MUTABLE PORTION OF A FULL DOWNLOAD URL)
+# e.g., (jdk8u222-b10/OpenJDK8U-jdk_x64_linux_hotspot_8u222b10.tar.gz jdk-9.0.4%2B11/OpenJDK9U-jdk_x64_linux_hotspot_9.0.4_11.tar.gz jdk-10.0.2%2B13.1/OpenJDK10U-jdk_x64_linux_hotspot_10.0.2_13.tar.gz jdk-11.0.4%2B11/OpenJDK11U-jdk_x64_linux_hotspot_11.0.4_11.tar.gz jdk-12.0.2%2B10/OpenJDK12U-jdk_x64_linux_hotspot_12.0.2_10.tar.gz)

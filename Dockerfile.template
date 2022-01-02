@@ -1,0 +1,24 @@
+# vim:set ft=dockerfile:
+#
+# `FROM` value will be:
+#
+# cimg/base:stable, cimg/base:stable-node for monthly releases
+# cimg/base:edge, cimg/base:edge-node for commits to master or any other branch
+
+FROM %%BASE%%
+
+LABEL maintainer="CircleCI Community/Partner Engineering <community-partner@circleci.com>"
+
+# Set default shell for building image
+SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
+
+# set up env vars
+ENV DEBIAN_FRONTEND noninteractive
+
+# main Dockerfile logic goes here:
+# >
+# >
+# >
+
+# Set default shell for users
+SHELL ["/bin/bash", "-c"]
