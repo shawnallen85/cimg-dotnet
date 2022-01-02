@@ -1,55 +1,225 @@
-# `cimg/template` [![CircleCI Build Status](https://circleci.com/gh/CircleCI-Public/cimg-template.svg?style=shield "CircleCI Build Status")](https://circleci.com/gh/CircleCI-Public/cimg-template) [![GitHub License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://raw.githubusercontent.com/CircleCI-Public/cimg-template/master/LICENSE) [![CircleCI Community](https://img.shields.io/badge/community-CircleCI%20Discuss-343434.svg)](https://discuss.circleci.com/c/ecosystem/images)
+<div align="center">
+	<p>
+		<img alt="CircleCI Logo" src="https://raw.github.com/CircleCI-Public/cimg-base/master/img/circle-circleci.svg?sanitize=true" width="75" />
+		<img alt="Docker Logo" src="https://raw.github.com/CircleCI-Public/cimg-base/master/img/circle-docker.svg?sanitize=true" width="75" />
+		<img alt=".NET Logo" src="https://raw.github.com/dotnet/brand/master/logo/dotnet-logo.svg?sanitize=true" width="75" />
+	</p>
+	<h1>CircleCI Convenience Images => .NET</h1>
+	<h3>A Continuous Integration focused .NET Container image built to run on CircleCI</h3>
+</div>
 
-Template repository for new CircleCI prototype image repos, each extending CircleCI's [prototype `cimg/base` image](https://github.com/CircleCI-Public/cimg-base).
+![Software License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-## Purpose/Usage
+`cimg/dotnet` is a Docker image created by Shawn Black with continuous integration builds in mind.
+Each tag contains a complete .NET SDK and any binaries and tools that are required for builds to complete successfully in a CircleCI environment.
 
-To create a new CircleCI prototype image, start a new repository (`CircleCI-Public/cimg-IMAGE_NAME`) from this template.
+## Table of Contents
 
-Populate the `manifests` file according to the instructions that appear there.
+- [Getting Started](#getting-started)
+- [How This Image Works](#how-this-image-works)
+- [Development](#development)
+- [Contributing](#contributing)
+- [Additional Resources](#additional-resources)
+- [License](#license)
 
-_(config.yml instructions go here, etc.)_
+## Getting Started
 
-Finally, in `README.md` (this file), replace `IMAGE_NAME` with the name of the new image (e.g., `elixir`). Do the same with the string `template` where it appears in either `cimg-template` or `cimg/template`. Then complete this `README` by replacing any text that is specific to this template repository itself (such as this section) with corresponding information about the new image/repository instead.
+This image can be used with the CircleCI `docker` executor.
+For example:
 
-## Variants
+```yaml
+jobs:
+  build:
+    docker:
+      - image: cimg/dotnet:6.0
+    steps:
+      - checkout
+      - run: dotnet --version
+```
 
-Currently, there is only a Node variant of this image. The Node variant includes the latest LTS version of Node, [installed via the `n` Node version manager](https://github.com/tj/n). To use a different Node version, see [Installing/Activating Node Versions](https://github.com/tj/n#installingactivating-node-versions), or use [CircleCI's Node orb](http://circleci.com/orbs/registry/orb/circleci/node#commands-install-node) to manually install a different version of Node. See below for explanation of specific `-node` (and other) tags.
+In the above example, the CircleCI .NET Docker image is used for the primary container.
+More specifically, the tag `6.0` is used meaning the version of .NET will be .NET 6.0 (in addition to any supported LTS releases of .NET).
+You can now use .NET within the steps for this job.
 
-To create the functionality of a `-browsers` variant, use [CircleCI's `browser-tools` orb](http://github.com/circleci-public/browser-tools-orb/) to install browsers at runtime.
 
-## Tags
+## How This Image Works
 
-### `<IMAGE_NAME-version>-<year>.<month>`, `<IMAGE_NAME-version>-<year>.<month>-node`
-Mostly immutable (except in the case of CVEs or severe bugs) monthly release tags for this image and its Node variant. Any new or removed tools from the base image in the last month will be reflected in this image release. For example, the `11.0.4-2019.04`/`11.0.4-2019.04-node` tags would include any changes to this repo/image that occurred in March 2019. Monthly releases are built on the 3rd of every month.
+This image contains the .NET SDK and its complete toolchain.
 
-### `<IMAGE_NAME-version>-stable`, `<IMAGE_NAME-version>-stable-node`
-Mutable tags representing the most recent monthly release of this image and its Node variant. For example, if today's date was April 15th, 2019, then the `11.0.4-stable`/`11.0.4-stable-node` tags would be aliases for the `11.0.4-2019.04`/`11.0.4-2019.04-node` tags.
+### Variants
 
-### `<IMAGE_NAME-version>-edge`, `<IMAGE_NAME-version>-edge-node`
-Mutable tags representing the builds of this image and its Node variant following the most recent successful commit to this repository's `master` branch.
+Variant images typically contain the same base software, but with a few additional modifications.
 
-### `latest`
-Mutable tag that represents the latest non-Node-variant, vanilla `cimg/IMAGE_NAME` image of any version, functionally duplicating whichever is the most recent Ruby version pushed to either the `edge` or `stable` tags. Anyone calling the `cimg/IMAGE_NAME` image without specifying a tag will get this version of the image.
+#### Node.js
 
-## Resources
+The Node.js variant is the same .NET image but with Node.js also installed.
+The Node.js variant will be used by appending `-node` to the end of an existing `cimg/dotnet` tag.
 
-Stub text.
+```yaml
+jobs:
+  build:
+    docker:
+      - image: cimg/dotnet:6.0-node
+    steps:
+      - checkout
+      - run: dotnet --version
+      - run: node --version
+```
+
+#### Browsers
+
+The browsers variant is the same .NET image but with Node.js, Java, Selenium, and browser dependencies pre-installed via apt.
+The browsers variant can be used by appending `-browser` to the end of an existing `cimg/dotnet` tag.
+The browsers variant is designed to work in conjunction with the [CircleCI Browser Tools orb](https://circleci.com/developer/orbs/orb/circleci/browser-tools).
+You can use the orb to install a version of Google Chrome and/or Firefox into your build. The image contains all of the supporting tools needed to use both the browser and its driver.
+
+```yaml
+orbs:
+  browser-tools: circleci/browser-tools@1.1
+jobs:
+  build:
+    docker:
+      - image: cimg/dotnet:6.0-browsers
+    steps:
+      - browser-tools/install-browser-tools
+      - checkout
+      - run: |
+          dotnet --version
+          node --version
+          java --version
+          google-chrome --version
+```
+
+### Tagging Scheme
+
+This image has the following tagging scheme:
+
+```
+cimg/dotnet:<dotnet-version>[-variant]
+```
+
+`<dotnet-version>` - The version of .NET to use.
+This can be the minor release (such as `6.0`).
+
+`[-variant]` - Variant tags, if available, can optionally be used.
+Once the Node.js variant is available, it could be used like this: `cimg/dotnet:6.0-node`.
 
 ## Development
 
-Working on CircleCI Docker images.
+Images can be built and run locally with this repository.
+This has the following requirements:
 
-### Adding new `IMAGE_NAME` versions
-To add a new version of IMAGE_NAME, add it to the [`versions` array in the `manifests` file](https://github.com/CircleCI-Public/cimg-template/blob/master/manifest#L6), as well as to the [`version` pipeline parameter `enum` at the top of the `config.yml` file](https://github.com/CircleCI-Public/cimg-template/blob/master/.circleci/config.yml#L41).
+- local machine of Linux (Ubuntu tested) or macOS
+- modern version of Bash (v4+)
+- modern version of Docker Engine (v19.03+) or Buildah (tested with v1.21.3)
 
-### Commits to non-master branches
-Upon successful commits to non-master branches of this repository, `IMAGE_NAME` versions of this image and its Node variant will be pushed to `ccitest/IMAGE_NAME` for any requisite post-deployment testing. Tags there will represent the branch and commit hash that triggered them. For example, a successful commit to a branch of this repository called `dev` would result in the creation of the following image/tag: `ccitest/IMAGE_NAME:<IMAGE_NAME-version>-dev-${CIRCLE_SHA1:0:7}"`, where `${CIRCLE_SHA1:0:7}"` represents the first six characters of that particular commit hash.
+### Cloning For Community Users (no write access to this repository)
 
-### Patching bugs and vulnerabilities
-Monthly release tags can be manually re-published to patch vulnerabilities or severe bugs via a pushing a `git` tag that contains the string `monthly`. This tag will trigger a workflow that will rebuild all current `<IMAGE_NAME-version>-<year>.<month>` and `<IMAGE_NAME-version>-<year>.<month>-node` tags, as well as the `<IMAGE_NAME-version>-stable`, `<IMAGE_NAME-version>-stable-node`, and `latest` alias tags.
+Fork this repository on GitHub.
+When you get your clone URL, you'll want to add `--recurse-submodules` to the clone command in order to populate the Git submodule contained in this repo.
+It would look something like this:
 
-### Contributing
-We welcome [issues](https://github.com/CircleCI-Public/cimg-template/issues) to and [pull requests](https://github.com/CircleCI-Public/cimg-template/pulls) against this repository!
+```bash
+git clone --recurse-submodules <my-clone-url>
+```
 
-This image is maintained by the Community & Partner Engineering Team.
+If you missed this step and already cloned, you can just run `git submodule update --recursive` to populate the submodule.
+Then you can optionally add this repo as an upstream to your own:
+
+```bash
+git remote add upstream https://github.com/shawnallen85/cimg-dotnet.git
+```
+
+### Cloning For Maintainers (you have write access to this repository)
+
+Clone the project with the following command so that you populate the submodule:
+
+```bash
+git clone --recurse-submodules git@github.com:shawnallen85/cimg-dotnet.git
+```
+
+### Generating Dockerfiles
+
+Dockerfiles can be generated for a specific .NET version using the `gen-dockerfiles.sh` script.
+For example, to generate the Dockerfile for .NET v5.0, you would run the following from the root of the repo:
+
+```bash
+./shared/gen-dockerfiles.sh 5.0
+```
+
+The generated Dockerfile will be located at `./5.0/Dockefile`.
+To build this image locally and try it out, you can run the following:
+
+```bash
+cd 5.0
+docker build -t test/dotnet:5.0 .
+docker run -it test/dotnet:5.0 bash
+```
+
+### Building the Dockerfiles
+
+To build the Docker images locally as this repository does, you'll want to run the `build-images.sh` script:
+
+```bash
+./build-images.sh
+```
+
+This would need to be run after generating the Dockerfiles first.
+
+When releasing proper images for CircleCI, this script is run from a CircleCI pipeline and not locally.
+
+### Publishing Official Images (for Maintainers only)
+
+The individual scripts (above) can be used to create the correct files for an image, and then added to a new git branch, committed, etc.
+A release script is included to make this process easier.
+To make a proper release for this image, let's use the fake .NET version of .NET v9.99, you would run the following from the repo root:
+
+```bash
+./shared/release.sh 9.99
+```
+
+This will automatically create a new Git branch, generate the Dockerfile(s), stage the changes, commit them, and push them to GitHub.
+The commit message will end with the string `[release]`.
+This string is used by CircleCI to know when to push images to Docker Hub.
+All that would need to be done after that is:
+
+- wait for build to pass on CircleCI
+- review the PR
+- merge the PR
+
+The master branch build will then publish a release.
+
+### Incorporating Changes
+
+How changes are incorporated into this image depends on where they come from.
+
+**build scripts** - Changes within the `./shared` submodule happen in its [own repository](https://github.com/CircleCI-Public/cimg-shared).
+For those changes to affect this image, the submodule needs to be updated.
+Typically like this:
+
+```bash
+cd shared
+git pull
+cd ..
+git add shared
+git commit -m "Updating submodule for foo."
+```
+
+**parent image** - By design, when changes happen to a parent image, they don't appear in existing .NET images.
+This is to aid in "determinism" and prevent breaking customer builds.
+New .NET images will automatically pick up the changes.
+
+If you *really* want to publish changes from a parent image into the .NET image, you have to build a specific image version as if it was a new image.
+This will create a new Dockerfile and once published, a new image.
+
+## Additional Resources
+
+[CircleCI Docs](https://circleci.com/docs/) - The official CircleCI Documentation website.
+[CircleCI Configuration Reference](https://circleci.com/docs/2.0/configuration-reference/#section=configuration) - From CircleCI Docs, the configuration reference page is one of the most useful pages we have.
+It will list all of the keys and values supported in `.circleci/config.yml`.
+[Docker Docs](https://docs.docker.com/) - For simple projects this won't be needed but if you want to dive deeper into learning Docker, this is a great resource.
+
+## License
+
+This repository is licensed under the MIT license.
+The license can be found [here](./LICENSE).

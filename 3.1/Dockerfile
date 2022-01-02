@@ -1,11 +1,11 @@
 # vim:set ft=dockerfile:
 
-FROM cimg/%%PARENT%%:2021.10
+FROM cimg/base:2021.10
 
 LABEL maintainer="CircleCI Community & Partner Engineering Team <community-partner@circleci.com>"
 
 ENV DEBIAN_FRONTEND noninteractive
-ENV DOTNET_VERSION=%%MAIN_VERSION%%
+ENV DOTNET_VERSION=3.1
 
 RUN wget https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
         sudo dpkg -i packages-microsoft-prod.deb && \
