@@ -38,9 +38,8 @@ jobs:
 ```
 
 In the above example, the CircleCI .NET Docker image is used for the primary container.
-More specifically, the tag `6.0` is used meaning the version of .NET will be .NET 6.0 (in addition to any supported LTS releases of .NET).
+More specifically, the tag `6.0` is used meaning the version of .NET will be .NET 6.0.
 You can now use .NET within the steps for this job.
-
 
 ## How This Image Works
 
